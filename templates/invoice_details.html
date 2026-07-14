@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Details</title>
+    <link rel="stylesheet" href="/static/css/repository.css?v=20260714-2">
+</head>
+<body>
+<main class="invoice-details-page">
+    <div class="invoice-details-container">
+        <header class="invoice-details-header">
+            <div>
+                <p class="page-eyebrow">Invoice Repository</p>
+                <h1>Invoice Details</h1>
+                <p class="page-subtitle">Review invoice information and the original document.</p>
+            </div>
+
+            <a class="invoice-action invoice-action-secondary" href="/repository">
+                <span aria-hidden="true">&#8592;</span>
+                Back to Repository
+            </a>
+        </header>
+
+        <div class="invoice-details-layout">
+            <section class="invoice-panel invoice-preview-panel" aria-labelledby="preview-heading">
+                <div class="panel-heading">
+                    <div>
+                        <p class="panel-label">Document</p>
+                        <h2 id="preview-heading">Invoice Preview</h2>
+                    </div>
+                    <span class="preview-status"><span></span> Original file</span>
+                </div>
+
+                <div class="preview-frame-wrapper">
+                    <iframe class="invoice-preview" src="/view/{{ invoice.id }}" title="Invoice Preview"></iframe>
+                </div>
+            </section>
+
+            <aside class="invoice-panel invoice-information-panel" aria-labelledby="information-heading">
+                <div class="panel-heading">
+                    <div>
+                        <p class="panel-label">Overview</p>
+                        <h2 id="information-heading">Invoice Information</h2>
+                    </div>
+                </div>
+
+                <div class="invoice-summary-grid">
+                    <div class="summary-card summary-card-primary">
+                        <span>Total Amount</span>
+                        <strong>{% if invoice.total_amount is not none %}&#8377; {{ '{:,.2f}'.format(invoice.total_amount|float) }}{% else %}-{% endif %}</strong>
+                    </div>
+                    <div class="summary-card summary-card-accent">
+                        <span>GST Amount</span>
+                        <strong>{% if invoice.gst_amount is not none %}&#8377; {{ '{:,.2f}'.format(invoice.gst_amount|float) }}{% else %}-{% endif %}</strong>
+                    </div>
+                </div>
+
+                <dl class="invoice-metadata">
+                    <div class="metadata-row">
+                        <dt>Invoice Number</dt>
+                        <dd>{{ invoice.invoice_number or '-' }}</dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Vendor Name</dt>
+                        <dd>{{ invoice.vendor_name or '-' }}</dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Invoice Date</dt>
+                        <dd>{{ invoice.invoice_date or '-' }}</dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>GST Amount</dt>
+                        <dd>{% if invoice.gst_amount is not none %}&#8377; {{ '{:,.2f}'.format(invoice.gst_amount|float) }}{% else %}-{% endif %}</dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Total Amount</dt>
+                        <dd>{% if invoice.total_amount is not none %}&#8377; {{ '{:,.2f}'.format(invoice.total_amount|float) }}{% else %}-{% endif %}</dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Upload Date</dt>
+                        <dd>{% if invoice.uploaded_at %}{{ invoice.uploaded_at.strftime('%d-%m-%Y %H:%M') }}{% else %}-{% endif %}</dd>
+                    </div>
+                </dl>
+
+                <div class="invoice-actions">
+                    <a class="invoice-action invoice-action-primary" href="/view/{{ invoice.id }}" target="_blank" rel="noopener">
+                        View Original
+                    </a>
+                    <a class="invoice-action invoice-action-secondary" href="/download/{{ invoice.id }}">
+                        Download Invoice
+                    </a>
+                    <a class="invoice-action invoice-action-quiet" href="/repository">
+                        <span aria-hidden="true">&#8592;</span>
+                        Back to Repository
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</main>
+</body>
+</html>

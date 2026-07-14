@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Upload Invoice</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Upload Invoice</h1>
+
+    <div class="card">
+
+        <form
+            action="/upload"
+            method="post"
+            enctype="multipart/form-data">
+
+            <input
+                type="file"
+                name="file"
+                accept=".pdf,.png,.jpg,.jpeg"
+                required>
+
+            <br><br>
+
+            <button type="submit">
+                Upload
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

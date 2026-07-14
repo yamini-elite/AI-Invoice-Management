@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice Repository</title>
+
+    <link rel="stylesheet" href="/static/css/repository.css?v=20260714-3">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Invoice Repository</h1>
+
+    <!-- Main KPI Cards -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>Total Invoices</h3>
+            <h2>{{ total_invoices }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Uploaded Today</h3>
+            <h2>{{ today_uploads }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>OCR Processed</h3>
+            <h2>{{ ocr_processed }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Total Value</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(total_value|float) }}</h2>
+        </div>
+
+    </div>
+
+    <!-- Analytics Cards -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <h3>Average Invoice</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(avg_value|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Highest Invoice</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(max_value|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Lowest Invoice</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(min_value|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Unique Vendors</h3>
+            <h2>{{ vendor_count }}</h2>
+        </div>
+
+    </div>
+
+    <!-- Search -->
+
+    <div class="search-bar">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="🔍 Search invoices..."
+        >
+
+        <a class="export-button" href="/export-excel">Export Excel</a>
+
+    </div>
+
+    <!-- Invoice Table -->
+
+    <div class="repository-card repository-table-card">
+
+        <table id="invoiceTable">
+
+            <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>File Name</th>
+                    <th>Invoice No</th>
+                    <th>Vendor</th>
+                    <th>Amount</th>
+                    <th>Upload Date</th>
+                    <th>Actions</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for invoice in invoices %}
+
+                <tr>
+
+                    <td>{{ invoice.id }}</td>
+
+                    <td>{{ invoice.file_name }}</td>
+
+                    <td>
+                        {{ invoice.invoice_number or '-' }}
+                    </td>
+
+                    <td>
+                        {{ invoice.vendor_name or '-' }}
+                    </td>
+
+                    <td>
+                        {% if invoice.total_amount is not none %}
+                            &#8377; {{ '{:,.2f}'.format(invoice.total_amount|float) }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if invoice.uploaded_at %}
+                            {{ invoice.uploaded_at.strftime('%d-%m-%Y %H:%M') }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+
+                        <div class="actions">
+
+                            <a href="/invoice-details/{{ invoice.id }}">
+                                Details
+                            </a>
+
+                            <a href="/view/{{ invoice.id }}">
+                                View
+                            </a>
+
+                            <a href="/download/{{ invoice.id }}">
+                                Download
+                            </a>
+
+                            <a href="/delete/{{ invoice.id }}"
+                               onclick="return confirm('Delete this invoice?')">
+                                Delete
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Top Vendors -->
+
+    <div class="repository-card">
+
+        <h2 style="margin-bottom:20px;">
+            Top Vendors
+        </h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Vendor</th>
+                    <th>Invoices</th>
+                    <th>Total Spend</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for vendor in top_vendors %}
+
+                <tr>
+
+                    <td>{{ vendor.vendor_name }}</td>
+
+                    <td>{{ vendor.invoice_count }}</td>
+
+                    <td>&#8377; {{ '{:,.2f}'.format(vendor.total_spend|float) }}</td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Invoice Trend Chart -->
+
+    <div class="repository-card chart-card chart-card-wide">
+
+        <h2>
+            Invoice Value Trend
+        </h2>
+
+        <canvas id="invoiceTrendChart"></canvas>
+
+    </div>
+
+    <!-- Phase 6C -->
+    <div class="stats-grid analytics-section">
+
+        <div class="stat-card">
+            <h3>Total GST</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(total_gst|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Average GST</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(avg_gst|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Highest GST</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(max_gst|float) }}</h2>
+        </div>
+
+        <div class="stat-card">
+            <h3>Lowest GST</h3>
+            <h2>&#8377; {{ '{:,.2f}'.format(min_gst|float) }}</h2>
+        </div>
+
+    </div>
+
+    <div class="dashboard-chart-grid">
+        <!-- Row 1 -->
+        <div class="repository-card chart-card">
+            <h2>Top Vendors by Spend</h2>
+            <canvas id="topVendorsChart"></canvas>
+        </div>
+
+        <div class="repository-card chart-card">
+            <h2>Vendor Spend Distribution</h2>
+            <canvas id="vendorPieChart"></canvas>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="repository-card chart-card">
+            <h2>GST Trend</h2>
+            <canvas id="gstTrendChart"></canvas>
+        </div>
+
+        <div class="repository-card chart-card">
+            <h2>Monthly Upload Trend</h2>
+            <canvas id="monthlyUploadChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Search Script -->
+
+<script>
+
+const searchInput = document.getElementById("searchInput");
+
+searchInput.addEventListener("keyup", function () {
+
+    const value = this.value.toLowerCase();
+
+    const rows = document.querySelectorAll("#invoiceTable tbody tr");
+
+    rows.forEach(row => {
+
+        const text = row.innerText.toLowerCase();
+
+        row.style.display = text.includes(value) ? "" : "none";
+
+    });
+
+});
+
+</script>
+
+<!-- Chart.js -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script id="invoice-trend-data" type="application/json">{{ invoice_trend | tojson }}</script>
+<script id="vendor-spend-data" type="application/json">{{ vendor_spend | tojson }}</script>
+<script id="top-vendor-data" type="application/json">{{ top_vendor_spend | tojson }}</script>
+<script id="gst-trend-data" type="application/json">{{ gst_trend | tojson }}</script>
+<script id="monthly-upload-data" type="application/json">{{ monthly_upload_trend | tojson }}</script>
+
+<script>
+
+const trendData = JSON.parse(document.getElementById("invoice-trend-data").textContent);
+
+const labels = trendData.map(item => item.day);
+
+const values = trendData.map(item => Number(item.amount));
+
+new Chart(
+    document.getElementById("invoiceTrendChart"),
+    {
+        type: "line",
+
+        data: {
+            labels: labels,
+
+            datasets: [{
+                label: "Invoice Amount",
+                data: values,
+                tension: 0.3
+            }]
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+    }
+);
+
+</script>
+<script>
+
+const vendorData = JSON.parse(document.getElementById("vendor-spend-data").textContent);
+
+const vendorLabels = vendorData.map(item => item.vendor);
+const vendorValues = vendorData.map(item => item.spend);
+
+new Chart(
+    document.getElementById("vendorPieChart"),
+    {
+        type: "pie",
+
+        data: {
+            labels: vendorLabels,
+
+            datasets: [{
+                data: vendorValues
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    }
+);
+
+</script>
+<script>
+
+const currencyFormatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 2
+});
+
+const analyticsScaleColor = "#94a3b8";
+const analyticsGridColor = "rgba(255, 255, 255, 0.08)";
+
+// Phase 6B
+const topVendorData = JSON.parse(document.getElementById("top-vendor-data").textContent);
+
+new Chart(document.getElementById("topVendorsChart"), {
+    type: "bar",
+    data: {
+        labels: topVendorData.map(item => item.vendor),
+        datasets: [{
+            label: "Total Spend",
+            data: topVendorData.map(item => item.spend),
+            backgroundColor: "rgba(96, 165, 250, 0.75)",
+            borderColor: "#60a5fa",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: context => currencyFormatter.format(context.parsed.x)
+                }
+            }
+        },
+        scales: {
+            x: {
+                beginAtZero: true,
+                ticks: {
+                    color: analyticsScaleColor,
+                    callback: value => currencyFormatter.format(value)
+                },
+                grid: { color: analyticsGridColor }
+            },
+            y: {
+                ticks: { color: analyticsScaleColor },
+                grid: { display: false }
+            }
+        }
+    }
+});
+
+// Phase 6D
+const gstTrendData = JSON.parse(document.getElementById("gst-trend-data").textContent);
+
+new Chart(document.getElementById("gstTrendChart"), {
+    type: "line",
+    data: {
+        labels: gstTrendData.map(item => item.day),
+        datasets: [{
+            label: "GST Amount",
+            data: gstTrendData.map(item => item.gst_amount),
+            borderColor: "#34d399",
+            backgroundColor: "rgba(52, 211, 153, 0.15)",
+            fill: true,
+            tension: 0.3
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: context => currencyFormatter.format(context.parsed.y)
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: analyticsScaleColor },
+                grid: { color: analyticsGridColor }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: analyticsScaleColor,
+                    callback: value => currencyFormatter.format(value)
+                },
+                grid: { color: analyticsGridColor }
+            }
+        }
+    }
+});
+
+// Phase 6E
+const monthlyUploadData = JSON.parse(document.getElementById("monthly-upload-data").textContent);
+
+new Chart(document.getElementById("monthlyUploadChart"), {
+    type: "bar",
+    data: {
+        labels: monthlyUploadData.map(item => item.month),
+        datasets: [{
+            label: "Invoice Count",
+            data: monthlyUploadData.map(item => item.invoice_count),
+            backgroundColor: "rgba(167, 139, 250, 0.75)",
+            borderColor: "#a78bfa",
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                ticks: { color: analyticsScaleColor },
+                grid: { display: false }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: { color: analyticsScaleColor, precision: 0 },
+                grid: { color: analyticsGridColor }
+            }
+        }
+    }
+});
+
+</script>
+</body>
+
+</html>

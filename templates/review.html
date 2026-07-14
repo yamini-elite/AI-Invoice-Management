@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Invoice</title>
+
+    <link rel="stylesheet" href="/static/css/repository.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Review Extracted Invoice Data</h1>
+
+    <div class="repository-card">
+
+        <form action="/confirm-upload" method="post">
+
+            <!-- Hidden Fields -->
+
+            <input type="hidden"
+                   name="file_name"
+                   value="{{ file_name }}">
+
+            <input type="hidden"
+                   name="file_path"
+                   value="{{ file_path }}">
+
+            <!-- File Info -->
+
+            <label>Uploaded File</label>
+            <input type="text"
+                   value="{{ file_name }}"
+                   readonly>
+
+            <!-- OCR Fields -->
+
+            <label>Invoice Number</label>
+            <input type="text"
+                   name="invoice_number"
+                   value="{{ invoice_number or '' }}">
+
+            <label>Vendor Name</label>
+            <input type="text"
+                   name="vendor_name"
+                   value="{{ vendor_name or '' }}">
+
+            <label>Invoice Date</label>
+            <input type="date"
+                   name="invoice_date"
+                   value="{{ invoice_date or '' }}">
+
+            <label>Total Amount</label>
+            <input type="text"
+                   name="total_amount"
+                   value="{{ total_amount or '' }}">
+
+            <label>GST Amount</label>
+            <input type="text"
+                   name="gst_amount"
+                   value="{{ gst_amount or '' }}">
+
+            <div class="review-buttons">
+
+                <button type="submit" class="save-btn">
+                     Confirm & Save
+                </button>
+
+                <a href="/upload" class="cancel-btn">
+                     Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
