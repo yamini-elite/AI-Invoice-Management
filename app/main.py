@@ -10,7 +10,7 @@ from io import BytesIO
 from openpyxl import Workbook
 
 from app.database.db import get_connection
-from app.ocr.extractor import extract_invoice_data
+#from app.ocr.extractor import extract_invoice_data
 
 app = FastAPI()
 
@@ -52,28 +52,11 @@ async def upload_invoice(
     request: Request,
     file: UploadFile = File(...)
 ):
-
-    upload_dir = "uploads"
-    os.makedirs(upload_dir, exist_ok=True)
-
-    file_path = os.path.join(upload_dir, file.filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    ocr_data = extract_invoice_data(file_path)
-
     return templates.TemplateResponse(
         request=request,
-        name="review.html",
+        name="error.html",
         context={
-            "file_name": file.filename,
-            "file_path": file_path,
-            "invoice_number": ocr_data["invoice_number"],
-            "vendor_name": ocr_data["vendor_name"],
-            "invoice_date": ocr_data["invoice_date"],
-            "total_amount": ocr_data["total_amount"],
-            "gst_amount": ocr_data["gst_amount"]
+            "message": "OCR is disabled in cloud deployment."
         }
     )
 

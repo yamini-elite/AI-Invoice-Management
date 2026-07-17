@@ -1,9 +1,7 @@
-import mysql.connector
+import os
+import psycopg2
 
 def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="root",
-        database="invoice_db"
+    return psycopg2.connect(
+        os.getenv("DATABASE_URL")
     )
