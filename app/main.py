@@ -10,6 +10,7 @@ from io import BytesIO
 from openpyxl import Workbook
 
 from app.database.db import get_connection
+from psycopg2.extras import RealDictCursor
 #from app.ocr.extractor import extract_invoice_data
 
 app = FastAPI()
@@ -151,7 +152,7 @@ async def confirm_upload(
 def repository(request: Request):
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     # Statistics
 
@@ -161,7 +162,7 @@ def repository(request: Request):
     cursor.execute("""
         SELECT COUNT(*) AS today_count
         FROM invoices
-        WHERE DATE(uploaded_at) = CURDATE()
+        WHERE DATE(uploaded_at) = CURRENT_DATE
     """)
     today_uploads = cursor.fetchone()["today_count"]
 
@@ -306,10 +307,10 @@ def repository(request: Request):
     # Phase 6E
     cursor.execute("""
         SELECT
-            DATE_FORMAT(uploaded_at, '%Y-%m') AS month,
+            TO_CHAR(uploaded_at, 'YYYY-MM') AS month,
             COUNT(*) AS invoice_count
         FROM invoices
-        GROUP BY DATE_FORMAT(uploaded_at, '%Y-%m')
+        GROUP BY TO_CHAR(uploaded_at, 'YYYY-MM')
         ORDER BY month
     """)
     monthly_upload_trend = [
@@ -358,7 +359,7 @@ def repository(request: Request):
 def invoice_details(request: Request, invoice_id: int):
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         """
@@ -399,7 +400,7 @@ def invoice_details(request: Request, invoice_id: int):
 def export_excel():
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute("""
         SELECT
@@ -459,7 +460,7 @@ def export_excel():
 def view_invoice(invoice_id: int):
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         "SELECT file_path FROM invoices WHERE id=%s",
@@ -485,7 +486,7 @@ def view_invoice(invoice_id: int):
 def download_invoice(invoice_id: int):
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         "SELECT file_name, file_path FROM invoices WHERE id=%s",
@@ -515,7 +516,7 @@ def download_invoice(invoice_id: int):
 def delete_invoice(invoice_id: int):
 
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
 
     cursor.execute(
         "SELECT file_path FROM invoices WHERE id=%s",
